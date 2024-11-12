@@ -4,10 +4,15 @@ import com.example.ocr_project.dto.response.ResponseStatusDto;
 import com.example.ocr_project.entity.Image;
 import com.example.ocr_project.repository.UploadRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +27,9 @@ public class UploadService {
     private String uploadDir;
 
     private final UploadRepository uploadRepository;
+
+    @Autowired
+    private WebClient.Builder webClientBuilder;
 
     @Transactional
     public ResponseStatusDto imageUpload(MultipartFile multipartFile) {
@@ -41,10 +49,30 @@ public class UploadService {
                     .build();
             uploadRepository.save(image);
 
-            return new ResponseStatusDto("파일 업로드 성공", 200);
+            String imagePath = "D:/uploads/" + fileName;
+            String ocrResult = getOcr(imagePath);
+
+            return new ResponseStatusDto("파일 업로드 성공 : " + ocrResult, 200);
 
         } catch (IOException e) {
             return new ResponseStatusDto("파일 업로드 실패: " + e.getMessage(), 400);
         }
+    }
+
+    public String getOcr(String imagePath) {
+        try {
+            String result = webClientBuilder.build()
+                    .post()
+                    .uri("http://localhost:8000/ocr")
+                    .header(HttpHeaders.CONTENT_TYPE, "application/json")
+                    .bodyValue("{\"imagePath\": \"" + imagePath + "\"}")
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+            return result;
+        } catch (WebClientResponseException e) {
+            return "Error: " + e.getResponseBodyAsString();
+        }
+
     }
 }

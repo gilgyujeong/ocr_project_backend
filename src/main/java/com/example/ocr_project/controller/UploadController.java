@@ -16,6 +16,7 @@ public class UploadController {
 
     @PostMapping("/upload")
     public ResponseStatusDto imageUpload(@RequestParam("file")MultipartFile multipartFile) {
+        
         return uploadService.imageUpload(multipartFile);
     }
 }
