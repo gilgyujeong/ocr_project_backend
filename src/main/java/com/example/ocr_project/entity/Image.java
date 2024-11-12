@@ -19,5 +19,9 @@ public class Image extends Timestamped {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String ImageName;
+    @Column
+    private String imageName;
+
+    @Column
+    private String carNumber;
 }

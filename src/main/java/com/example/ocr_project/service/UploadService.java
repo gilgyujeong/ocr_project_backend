@@ -44,13 +44,14 @@ public class UploadService {
 
             file.transferTo(dest);
 
-            Image image = Image.builder()
-                    .ImageName(fileName)
-                    .build();
-            uploadRepository.save(image);
-
             String imagePath = "D:/uploads/" + fileName;
             String ocrResult = getOcr(imagePath);
+
+            Image image = Image.builder()
+                    .imageName(fileName)
+                    .carNumber(ocrResult.substring(ocrResult.length() - 6, ocrResult.length() - 2))
+                    .build();
+            uploadRepository.save(image);
 
             return new ResponseStatusDto("파일 업로드 성공 : " + ocrResult, 200);
 
