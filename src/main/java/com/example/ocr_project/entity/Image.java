@@ -24,4 +24,11 @@ public class Image extends Timestamped {
 
     @Column
     private String carNumber;
+
+    @Column
+    private boolean isCal;
+
+    public void update() {
+        this.isCal = true;
+    }
 }

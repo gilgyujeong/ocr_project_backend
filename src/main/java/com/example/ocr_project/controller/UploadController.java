@@ -1,6 +1,8 @@
 package com.example.ocr_project.controller;
 
+import com.example.ocr_project.dto.request.RequestImageFindDto;
 import com.example.ocr_project.dto.request.RequestImageUploadDto;
+import com.example.ocr_project.dto.response.ResponseDataDto;
 import com.example.ocr_project.dto.response.ResponseStatusDto;
 import com.example.ocr_project.service.UploadService;
 import lombok.RequiredArgsConstructor;
@@ -19,4 +21,15 @@ public class UploadController {
         
         return uploadService.imageUpload(multipartFile);
     }
+
+    @PostMapping("/find")
+    public ResponseDataDto<?> imageFind(@RequestBody RequestImageFindDto requestImageFindDto) {
+        return uploadService.imageFind(requestImageFindDto);
+    }
+
+    @PutMapping("/calculate/{imageId}")
+    public ResponseStatusDto imageUpdate(@PathVariable("imageId") Long imageId) {
+        return uploadService.imageUpdate(imageId);
+    }
+
 }

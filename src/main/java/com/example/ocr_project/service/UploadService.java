@@ -1,5 +1,8 @@
 package com.example.ocr_project.service;
 
+import com.example.ocr_project.dto.request.RequestImageFindDto;
+import com.example.ocr_project.dto.response.ResponseDataDto;
+import com.example.ocr_project.dto.response.ResponseParkHistoryDto;
 import com.example.ocr_project.dto.response.ResponseStatusDto;
 import com.example.ocr_project.entity.Image;
 import com.example.ocr_project.repository.UploadRepository;
@@ -18,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -44,12 +48,13 @@ public class UploadService {
 
             file.transferTo(dest);
 
-            String imagePath = "D:/uploads/" + fileName;
+            String imagePath = "C:/Users/AI-00/Desktop/ocr_project/ocr_project_frontend/ocr_project/public/upload/" + fileName;
             String ocrResult = getOcr(imagePath);
 
             Image image = Image.builder()
                     .imageName(fileName)
                     .carNumber(ocrResult.substring(ocrResult.length() - 6, ocrResult.length() - 2))
+                    .isCal(false)
                     .build();
             uploadRepository.save(image);
 
@@ -75,5 +80,21 @@ public class UploadService {
             return "Error: " + e.getResponseBodyAsString();
         }
 
+    }
+
+    public ResponseDataDto<?> imageFind(RequestImageFindDto requestImageFindDto) {
+        List<Image> imageList = uploadRepository.findAllByCarNumber(requestImageFindDto.getCarNumber());
+        List<ResponseParkHistoryDto> responseParkHistoryDtoList = imageList.stream().map(ResponseParkHistoryDto::new).toList();
+
+        return new ResponseDataDto<>(responseParkHistoryDtoList);
+    }
+
+    @Transactional
+    public ResponseStatusDto imageUpdate(Long imageId) {
+        Image image = uploadRepository.findById(imageId).orElseThrow(()
+                -> new IllegalArgumentException("존재하지 않는 이미지 아이디 입니다."));
+        image.update();
+
+        return new ResponseStatusDto("주차금액이 정산 되었습니다.", 200);
     }
 }
